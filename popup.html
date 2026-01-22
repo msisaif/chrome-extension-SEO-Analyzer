@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SEO Analyzer</title>
+        <style>
+            :root {
+                --bg: #0b1020;
+                --card: rgba(255, 255, 255, 0.06);
+                --muted: rgba(255, 255, 255, 0.72);
+                --text: rgba(255, 255, 255, 0.92);
+                --good: #22c55e;
+                --warn: #f59e0b;
+                --bad: #ef4444;
+                --border: rgba(255, 255, 255, 0.1);
+            }
+
+            body {
+                margin: 0;
+                width: 480px;
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    'Apple Color Emoji',
+                    'Segoe UI Emoji';
+            }
+
+            header {
+                padding: 14px 14px 10px;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+            }
+
+            .title {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .title h1 {
+                font-size: 14px;
+                margin: 0;
+                letter-spacing: 0.2px;
+            }
+
+            .title .url {
+                font-size: 11px;
+                color: var(--muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 270px;
+            }
+
+            .score {
+                display: grid;
+                place-items: center;
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                background: var(--card);
+                font-weight: 700;
+                font-size: 18px;
+            }
+
+            main {
+                padding: 12px 14px 14px;
+                display: grid;
+                gap: 10px;
+            }
+
+            .card {
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                background: var(--card);
+                padding: 10px;
+            }
+
+            .summary {
+                margin: 0;
+                font-size: 12px;
+                line-height: 1.35;
+                color: var(--muted);
+            }
+
+            .grid {
+                display: grid;
+                gap: 8px;
+            }
+
+            .row {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px;
+                border-radius: 10px;
+                border: 1px solid transparent;
+                background: rgba(255, 255, 255, 0.02);
+            }
+
+            .row .left {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .row .label {
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .row .detail {
+                font-size: 11px;
+                color: var(--muted);
+            }
+
+            .badge {
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 8px;
+                border-radius: 999px;
+                border: 1px solid var(--border);
+                background: rgba(255, 255, 255, 0.04);
+                white-space: nowrap;
+            }
+
+            .badge.good {
+                border-color: rgba(34, 197, 94, 0.5);
+                color: var(--good);
+            }
+
+            .badge.warn {
+                border-color: rgba(245, 158, 11, 0.55);
+                color: var(--warn);
+            }
+
+            .badge.bad {
+                border-color: rgba(239, 68, 68, 0.55);
+                color: var(--bad);
+            }
+
+            .error {
+                color: var(--bad);
+                font-size: 12px;
+            }
+
+            .spinner {
+                width: 14px;
+                height: 14px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-top-color: rgba(255, 255, 255, 0.85);
+                border-radius: 50%;
+                animation: spin 0.9s linear infinite;
+                display: inline-block;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .toolbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                margin-top: 8px;
+            }
+
+            button {
+                appearance: none;
+                border: 1px solid var(--border);
+                background: rgba(255, 255, 255, 0.06);
+                color: var(--text);
+                border-radius: 10px;
+                padding: 8px 10px;
+                font-size: 12px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background: rgba(255, 255, 255, 0.09);
+            }
+
+            button:disabled {
+                opacity: 0.55;
+                cursor: default;
+            }
+
+            footer {
+                padding: 10px 14px 14px;
+                color: var(--muted);
+                font-size: 11px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="title">
+                <h1>SEO Analyzer</h1>
+                <div class="url" id="pageUrl">Loading…</div>
+            </div>
+            <div class="score" id="score">—</div>
+        </header>
+
+        <main>
+            <div class="card">
+                <p class="summary" id="summary">
+                    <span class="spinner" aria-hidden="true"></span>
+                    Analyzing current page…
+                </p>
+                <div class="toolbar">
+                    <button id="refresh" disabled>Refresh</button>
+                    <span class="summary" id="timestamp"></span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="grid" id="results"></div>
+                <div class="error" id="error" hidden></div>
+            </div>
+        </main>
+
+        <footer>
+            Tip: Some pages (like <code>chrome://</code>) can’t be analyzed.
+        </footer>
+
+        <script src="popup.js"></script>
+    </body>
+</html>
